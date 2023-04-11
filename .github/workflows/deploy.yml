@@ -17,9 +17,9 @@ jobs:
         #OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         envkey_TEST: ${{ secrets.TEST }}
     - name: echo test command
-        run: |
-          echo .env.local.example
-          echo .env
+      run: |
+        echo .env.local.example
+        echo .env
     - name: executing remote ssh commands
       uses: appleboy/ssh-action@v0.1.9
       with:
