@@ -48,6 +48,6 @@ jobs:
       run: |
         TEMP=$(mktemp)
         echo "${{ secrets.KEY }}" > $TEMP
-        scp -rp -i $TEMP compose-prod.yml ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/chatgpt-ui/docker-compose.yml
-        scp -rp -i $TEMP .env.production ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/chatgpt-ui/.env.production
+        scp -o 'StrictHostKeyChecking no' -rp -i $TEMP compose-prod.yml ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/chatgpt-ui/docker-compose.yml
+        scp -o 'StrictHostKeyChecking no' -rp -i $TEMP .env.production ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/chatgpt-ui/.env.production
         ssh -o 'StrictHostKeyChecking no' -i $TEMP ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'bash -s' < deploy.sh
