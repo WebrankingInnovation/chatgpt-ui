@@ -17,15 +17,10 @@ jobs:
       uses: SpicyPizza/create-envfile@v1.3
       with:
         envkey_TEST: ${{ secrets.TEST }}
-        #GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-        #GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        #OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        file_name: .env.production
-    # test step
-    - name: echo test command
-      run: |
-        ls -al
-        cat .env.production
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        file_name: .env
     # docker build, login to GCP and push
     # - name: 'Docker build'
     #   run: docker build -t europe-west3-docker.pkg.dev/w-calderone/w-chatbot-ui/w-chatbot-ui .
@@ -46,6 +41,7 @@ jobs:
     # deploy to VM
     - name: Deploy
       run: |
+        cat .env >> .env.production
         TEMP=$(mktemp)
         echo "${{ secrets.KEY }}" > $TEMP
         scp -o 'StrictHostKeyChecking no' -rp -i $TEMP compose-prod.yml ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/chatgpt-ui/docker-compose.yml
