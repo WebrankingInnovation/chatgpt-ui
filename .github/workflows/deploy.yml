@@ -15,7 +15,11 @@ jobs:
         #GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         #GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         #OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        TEST: ${{ secrets.TEST }}
+        envkey_TEST: ${{ secrets.TEST }}
+    - name: echo test command
+        run: |
+          echo .env.local.example
+          echo .env
     - name: executing remote ssh commands
       uses: appleboy/ssh-action@v0.1.9
       with:
@@ -23,4 +27,6 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
-        script: whoami
+        script: |
+          whoami
+          ls -al
