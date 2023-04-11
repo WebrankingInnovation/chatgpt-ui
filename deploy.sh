@@ -1,4 +1,5 @@
 #!/bin/bash
+<<<<<<< HEAD
 set -e
 pwd
 ls -al
@@ -8,3 +9,8 @@ sudo docker compose pull
 sudo docker compose down
 sudo docker compose up -d
 echo "deploy finished"
+=======
+pwd
+ls -al
+whoami
+>>>>>>> ca25d12 (deploy)
