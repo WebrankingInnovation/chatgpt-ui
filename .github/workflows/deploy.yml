@@ -12,14 +12,14 @@ jobs:
     - name: make envfile
       uses: SpicyPizza/create-envfile@v1.3
       with:
+        envkey_TEST: ${{ secrets.TEST }}
         #GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         #GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         #OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        envkey_TEST: ${{ secrets.TEST }}
     - name: echo test command
       run: |
-        cat .env.local.example
-        cat .env
+        pwd
+        ls -al
     - name: executing remote ssh commands
       uses: appleboy/ssh-action@v0.1.9
       with:
