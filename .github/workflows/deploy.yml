@@ -18,8 +18,8 @@ jobs:
         envkey_TEST: ${{ secrets.TEST }}
     - name: echo test command
       run: |
-        echo .env.local.example
-        echo .env
+        cat .env.local.example
+        cat .env
     - name: executing remote ssh commands
       uses: appleboy/ssh-action@v0.1.9
       with:
