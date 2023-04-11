@@ -66,17 +66,17 @@ export const ChatbarSettings: FC<Props> = ({
         }
       />
 
-      {!(serverSideApiKeyIsSet) ? (
+      {!serverSideApiKeyIsSet ? (
         <Key apiKey={apiKey} onApiKeyChange={onApiKeyChange} />
       ) : null}
 
-      {!(serverSidePluginKeysSet) ? (
+      {/* {!(serverSidePluginKeysSet) ? (
         <PluginKeys
           pluginKeys={pluginKeys}
           onPluginKeyChange={onPluginKeyChange}
           onClearPluginKey={onClearPluginKey}
         />
-      ) : null}
+      ) : null} */}
     </div>
   );
 };
