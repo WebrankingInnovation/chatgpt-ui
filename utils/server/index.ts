@@ -26,6 +26,7 @@ export const OpenAIStream = async (
   systemPrompt: string,
   key: string,
   messages: Message[],
+  temperature: number,
 ) => {
   const res = await fetch(`${OPENAI_API_HOST}/v1/chat/completions`, {
     headers: {
@@ -46,7 +47,7 @@ export const OpenAIStream = async (
         ...messages,
       ],
       max_tokens: 1000,
-      temperature: 1,
+      temperature,
       stream: true,
     }),
   });

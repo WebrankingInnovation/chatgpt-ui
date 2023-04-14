@@ -115,6 +115,7 @@ const Home: React.FC<HomeProps> = ({
         messages: updatedConversation.messages,
         key: apiKey,
         prompt: updatedConversation.prompt,
+        temperature: parseFloat(localStorage.getItem('temperature') || '0.5'),
       };
 
       const endpoint = getEndpoint(plugin);
