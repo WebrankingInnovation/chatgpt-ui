@@ -148,24 +148,18 @@ const Home: React.FC<HomeProps> = ({
       if (!response.ok) {
         setLoading(false);
         setMessageIsStreaming(false);
-        if (
-          response.statusText.includes("This model's maximum context length")
-        ) {
-          toast(
-            (t) => (
-              <span>
-                Sembra che tu abbia raggiunto il <b>limite</b> di messaggi in
-                questa conversazione.
-                <br />
-                <br />
-                Iniziane una <b>nuova</b>! 💪🏼
-              </span>
-            ),
-            { duration: 50000 },
-          );
-        } else {
-          toast.error(response.statusText);
-        }
+        toast(
+          (t) => (
+            <span>
+              Sembra che tu abbia raggiunto il <b>limite</b> di messaggi in
+              questa conversazione.
+              <br />
+              <br />
+              Iniziane una <b>nuova</b>! 💪🏼
+            </span>
+          ),
+          { duration: 50000 },
+        );
         return;
       }
 
