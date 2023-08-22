@@ -29,11 +29,12 @@ import {
 import { saveFolders } from '@/utils/app/folders';
 import { exportData, importData } from '@/utils/app/importExport';
 import { savePrompts } from '@/utils/app/prompts';
-import { IconArrowBarLeft, IconArrowBarRight } from '@tabler/icons-react';
+import { IconShare } from '@tabler/icons-react';
 import { GetServerSideProps } from 'next';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { v4 as uuidv4 } from 'uuid';
@@ -50,6 +51,8 @@ const Home: React.FC<HomeProps> = ({
   defaultModelId,
 }) => {
   const { t } = useTranslation('chat');
+
+  const router = useRouter();
 
   // STATE ----------------------------------------------
 
@@ -158,7 +161,7 @@ const Home: React.FC<HomeProps> = ({
               Iniziane una <b>nuova</b>! 💪🏼
             </span>
           ),
-          { duration: 50000 },
+          { duration: 5000 },
         );
         return;
       }
@@ -744,10 +747,91 @@ const Home: React.FC<HomeProps> = ({
     }
   }, [serverSideApiKeyIsSet]);
 
+  // SHARE --------------------------------------------
+
+  useEffect(() => {
+    if (router?.query?.conversation) {
+      loadConversation(router?.query?.conversation);
+    }
+  }, [router?.query?.conversation]);
+
+  async function shareConversation() {
+    // salvo la conversazione su firestore
+    const response = await fetch('/api/firebase', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data: selectedConversation }),
+    });
+    const data = await response.json();
+
+    const shareLink = `${window.location.origin}?conversation=${data.id}`;
+
+    toast(
+      (t) => (
+        <p>
+          Clicca{' '}
+          <span
+            onClick={() => copyShareLink(shareLink)}
+            className="cursor-pointer"
+          >
+            <u>qui</u>
+          </span>{' '}
+          per copiare il link alla conversazione e condividerlo!
+        </p>
+      ),
+      { duration: 5000, icon: '🔗' },
+    );
+  }
+
+  function copyShareLink(link: string) {
+    navigator.clipboard.writeText(link);
+    toast.success('Link copiato!', { duration: 1000 });
+  }
+
+  async function loadConversation(id: string) {
+    // cerco la conversazione su firestore
+    const response = await fetch('/api/firebase', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data: { conversation: id } }),
+    });
+    const { conversation } = await response.json();
+
+    if (conversation) {
+      let cleanedConversationHistory: Conversation[] = [];
+      const conversationHistory = localStorage.getItem('conversationHistory');
+      if (conversationHistory) {
+        const parsedConversationHistory: Conversation[] =
+          JSON.parse(conversationHistory) || [];
+        cleanedConversationHistory = cleanConversationHistory(
+          parsedConversationHistory,
+        );
+      }
+
+      const updatedConversations = [...cleanedConversationHistory];
+      const exists = cleanedConversationHistory.find(
+        (item) => item.id === conversation.id,
+      );
+      if (!exists) updatedConversations.push(conversation); // la aggiungo solo se non ce l'ho già
+
+      setSelectedConversation(conversation);
+      setConversations(updatedConversations);
+
+      saveConversation(conversation);
+      saveConversations(updatedConversations);
+    }
+  }
+
   return (
     <>
       <Head>
-        <title>Mc GPT</title>
+        <title>
+          {selectedConversation ? selectedConversation.name : 'Mc GPT'}
+        </title>
         <meta name="description" content="ChatGPT but better." />
         <meta
           name="viewport"
@@ -767,53 +851,53 @@ const Home: React.FC<HomeProps> = ({
           </div>
 
           <div className="flex h-full w-full pt-[48px] sm:pt-0">
-            {showSidebar ? (
-              <div>
-                <Chatbar
-                  loading={messageIsStreaming}
-                  conversations={conversations}
-                  lightMode={lightMode}
-                  selectedConversation={selectedConversation}
-                  apiKey={apiKey}
-                  serverSideApiKeyIsSet={serverSideApiKeyIsSet}
-                  pluginKeys={pluginKeys}
-                  serverSidePluginKeysSet={serverSidePluginKeysSet}
-                  folders={folders.filter((folder) => folder.type === 'chat')}
-                  onToggleLightMode={handleLightMode}
-                  onCreateFolder={(name) => handleCreateFolder(name, 'chat')}
-                  onDeleteFolder={handleDeleteFolder}
-                  onUpdateFolder={handleUpdateFolder}
-                  onNewConversation={handleNewConversation}
-                  onSelectConversation={handleSelectConversation}
-                  onDeleteConversation={handleDeleteConversation}
-                  onUpdateConversation={handleUpdateConversation}
-                  onApiKeyChange={handleApiKeyChange}
-                  onClearConversations={handleClearConversations}
-                  onExportConversations={handleExportData}
-                  onImportConversations={handleImportConversations}
-                  onPluginKeyChange={handlePluginKeyChange}
-                  onClearPluginKey={handleClearPluginKey}
-                />
+            {/* {showSidebar ? ( */}
+            <div>
+              <Chatbar
+                loading={messageIsStreaming}
+                conversations={conversations}
+                lightMode={lightMode}
+                selectedConversation={selectedConversation}
+                apiKey={apiKey}
+                serverSideApiKeyIsSet={serverSideApiKeyIsSet}
+                pluginKeys={pluginKeys}
+                serverSidePluginKeysSet={serverSidePluginKeysSet}
+                folders={folders.filter((folder) => folder.type === 'chat')}
+                onToggleLightMode={handleLightMode}
+                onCreateFolder={(name) => handleCreateFolder(name, 'chat')}
+                onDeleteFolder={handleDeleteFolder}
+                onUpdateFolder={handleUpdateFolder}
+                onNewConversation={handleNewConversation}
+                onSelectConversation={handleSelectConversation}
+                onDeleteConversation={handleDeleteConversation}
+                onUpdateConversation={handleUpdateConversation}
+                onApiKeyChange={handleApiKeyChange}
+                onClearConversations={handleClearConversations}
+                onExportConversations={handleExportData}
+                onImportConversations={handleImportConversations}
+                onPluginKeyChange={handlePluginKeyChange}
+                onClearPluginKey={handleClearPluginKey}
+              />
 
-                <button
+              {/* <button
                   className="fixed left-[270px] top-5 z-50 h-7 w-7 hover:text-gray-400 dark:text-white dark:hover:text-gray-300 sm:left-[270px] sm:top-0.5 sm:h-8 sm:w-8 sm:text-neutral-700"
                   onClick={handleToggleChatbar}
                 >
                   <IconArrowBarLeft />
-                </button>
-                <div
-                  onClick={handleToggleChatbar}
-                  className="absolute left-0 top-0 z-10 h-full w-full bg-black opacity-70 sm:hidden"
-                ></div>
-              </div>
-            ) : (
-              <button
-                className="fixed left-4 top-2.5 z-50 h-7 w-7 text-white hover:text-gray-400 dark:text-white dark:hover:text-gray-300 sm:left-4 sm:top-0.5 sm:h-8 sm:w-8 sm:text-neutral-700"
+                </button> 
+               <div
                 onClick={handleToggleChatbar}
-              >
-                <IconArrowBarRight />
-              </button>
-            )}
+                className="absolute left-0 top-0 z-10 h-full w-full bg-black opacity-70 sm:hidden"
+              ></div> */}
+            </div>
+            {/* ) : (
+               // <button
+              //   className="fixed left-4 top-2.5 z-50 h-7 w-7 text-white hover:text-gray-400 dark:text-white dark:hover:text-gray-300 sm:left-4 sm:top-0.5 sm:h-8 sm:w-8 sm:text-neutral-700"
+              //   onClick={handleToggleChatbar}
+              // >
+              //   <IconArrowBarRight />
+              // </button>
+            )} */}
 
             <div className="flex flex-1">
               <Chat
@@ -833,37 +917,38 @@ const Home: React.FC<HomeProps> = ({
               />
             </div>
 
-            {showPromptbar ? (
-              <div>
-                <Promptbar
-                  prompts={prompts}
-                  folders={folders.filter((folder) => folder.type === 'prompt')}
-                  onCreatePrompt={handleCreatePrompt}
-                  onUpdatePrompt={handleUpdatePrompt}
-                  onDeletePrompt={handleDeletePrompt}
-                  onCreateFolder={(name) => handleCreateFolder(name, 'prompt')}
-                  onDeleteFolder={handleDeleteFolder}
-                  onUpdateFolder={handleUpdateFolder}
-                />
-                <button
-                  className="fixed right-[270px] top-5 z-50 h-7 w-7 hover:text-gray-400 dark:text-white dark:hover:text-gray-300 sm:right-[270px] sm:top-0.5 sm:h-8 sm:w-8 sm:text-neutral-700"
-                  onClick={handleTogglePromptbar}
-                >
-                  <IconArrowBarRight />
-                </button>
-                <div
-                  onClick={handleTogglePromptbar}
-                  className="absolute left-0 top-0 z-10 h-full w-full bg-black opacity-70 sm:hidden"
-                ></div>
-              </div>
-            ) : (
+            {/* {showPromptbar ? ( */}
+            <div>
+              <Promptbar
+                prompts={prompts}
+                folders={folders.filter((folder) => folder.type === 'prompt')}
+                onCreatePrompt={handleCreatePrompt}
+                onUpdatePrompt={handleUpdatePrompt}
+                onDeletePrompt={handleDeletePrompt}
+                onCreateFolder={(name) => handleCreateFolder(name, 'prompt')}
+                onDeleteFolder={handleDeleteFolder}
+                onUpdateFolder={handleUpdateFolder}
+              />
+              <button
+                className="fixed right-[270px] top-5 z-50 h-7 w-7 hover:text-gray-400 dark:text-white dark:hover:text-gray-300 sm:right-[270px] sm:top-0.5 sm:h-8 sm:w-8 sm:text-neutral-700"
+                onClick={shareConversation}
+                title="Condividi conversazione"
+              >
+                <IconShare />
+              </button>
+              <div
+                onClick={shareConversation}
+                className="absolute left-0 top-0 z-10 h-full w-full bg-black opacity-70 sm:hidden"
+              ></div>
+            </div>
+            {/* ) : (
               <button
                 className="fixed right-4 top-2.5 z-50 h-7 w-7 text-white hover:text-gray-400 dark:text-white dark:hover:text-gray-300 sm:right-4 sm:top-0.5 sm:h-8 sm:w-8 sm:text-neutral-700"
                 onClick={handleTogglePromptbar}
               >
                 <IconArrowBarLeft />
               </button>
-            )}
+            )} */}
           </div>
         </main>
       )}

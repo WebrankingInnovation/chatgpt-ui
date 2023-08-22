@@ -38,7 +38,7 @@ export const Temperature: FC<Props> = () => {
         name="temperatureRange"
         min="0"
         max="1"
-        step="0.01"
+        step="0.1"
         value={temperature}
         onChange={handleTemperatureChange}
         className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-gray-700"
