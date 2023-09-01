@@ -90,6 +90,8 @@ const Home: React.FC<HomeProps> = ({
     plugin: Plugin | null = null,
   ) => {
     if (selectedConversation) {
+      window?.dataLayer?.push({ event: 'submit_chat' });
+
       let updatedConversation: Conversation;
 
       if (deleteCount) {
